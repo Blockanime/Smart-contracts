@@ -1,5 +1,4 @@
-import NonFungibleToken from 0x631e88ae7f1d7c20
-import BlockAnime from 0x95c64d0a6df03a68
+import Blockanime from 0x95c64d0a6df03a68
 
 // This transaction transfers a number of moments to a recipient
 
@@ -10,10 +9,10 @@ import BlockAnime from 0x95c64d0a6df03a68
 
 transaction(recipientAddress: Address, nftIDs: [UInt64]) {
 
-    let transferRef: &BlockAnime.Collection
+    let transferRef: &Blockanime.Collection
     
     prepare(acct: AuthAccount) {
-        self.transferRef = acct.borrow<&BlockAnime.Collection>(from: BlockAnime.CollectionStoragePath)!
+        self.transferRef = acct.borrow<&Blockanime.Collection>(from: Blockanime.CollectionStoragePath)!
     }
 
     execute {
@@ -24,7 +23,7 @@ transaction(recipientAddress: Address, nftIDs: [UInt64]) {
         let recipient = getAccount(recipientAddress)
 
         // get the Collection reference for the receiver
-        let receiverRef = recipient.getCapability(/public/BlockAnimeCollection).borrow<&{BlockAnime.BlockAnimeCollectionPublic}>()
+        let receiverRef = recipient.getCapability(/public/BlockanimeCollection).borrow<&{Blockanime.BlockanimeCollectionPublic}>()
             ?? panic("Could not borrow a reference to the recipients moment receiver")
 
         // deposit the NFT in the receivers collection

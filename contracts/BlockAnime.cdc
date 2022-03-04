@@ -1,28 +1,27 @@
 import NonFungibleToken from 0x631e88ae7f1d7c20
-
+import MetadataViews from 0x631e88ae7f1d7c20
 //BlockAnime
 // NFT items for Anime!
 //
-pub contract BlockAnime: NonFungibleToken {
+pub contract Blockanime: NonFungibleToken {
 
     // Events
     //
     pub event ContractInitialized()
     pub event Withdraw(id: UInt64, from: Address?)
     pub event Deposit(id: UInt64, to: Address?)
-    pub event Minted(id: UInt64, charName: String, genre : String,animeName : String)
-    pub event Destroyed(id: UInt64)
+    pub event Minted(id: UInt64, charName: String, animeName : String,thumbnail : String)
+    
 
     // Named Paths
     //
     pub let CollectionStoragePath: StoragePath
     pub let CollectionPublicPath: PublicPath
-    pub let CollectionPrivatePath: PrivatePath
+
     pub let MinterStoragePath: StoragePath
-    pub let MinterPrivatePath : PrivatePath
 
 
-    
+
     // totalSupply
     // The total number of Anime Characters that have been minted
     //
@@ -31,39 +30,58 @@ pub contract BlockAnime: NonFungibleToken {
     // NFT
     // A Card as an NFT
     //
-    pub resource NFT: NonFungibleToken.INFT {
-        // The token's ID
+    pub resource NFT: NonFungibleToken.INFT,MetadataViews.Resolver {
+
         pub let id: UInt64
     
         pub let charName : String
 
-        pub let genre : String
-
         pub let animeName : String
+
+        pub let thumbnail : String
 
         // initializer
         //
-        init(initID: UInt64, initName: String, initGenre : String,initAnime : String) {
+        init(initID: UInt64, initCharName: String, initAnimeName : String,initThumbnail : String) {
             self.id = initID
-            self.charName = initName
-            self.genre= initGenre
-            self.animeName = initAnime
+            self.charName = initCharName
+            self.animeName= initAnimeName
+            self.thumbnail = initThumbnail
         }
 
-        destroy (){
-            emit Destroyed(id : self.id)
+         pub fun getViews(): [Type] {
+            return [
+                Type<MetadataViews.Display>()
+            ]
         }
+
+        pub fun resolveView(_ view: Type): AnyStruct? {
+            switch view {
+                case Type<MetadataViews.Display>():
+                    return MetadataViews.Display(
+                        name: self.charName,
+                        description: self.animeName,
+                        thumbnail: MetadataViews.HTTPFile(
+                            url: self.thumbnail
+                        )
+                    )
+            }
+
+            return nil
+        }
+
+       
     }
 
     // This is the interface that users can cast their Anime Collection as
     // to allow others to deposit Anime into their Collection. It also allows for reading
     // the details of Anime in the Collection.
-    pub resource interface BlockAnimeCollectionPublic {
+    pub resource interface BlockanimeCollectionPublic {
         pub fun deposit(token: @NonFungibleToken.NFT)
-        pub fun batchDeposit(tokens: @NonFungibleToken.Collection)
+        pub fun batchDeposit(tokens : @NonFungibleToken.Collection)
         pub fun getIDs(): [UInt64]
         pub fun borrowNFT(id: UInt64): &NonFungibleToken.NFT
-        pub fun borrowAnimeCard(id: UInt64): &BlockAnime.NFT? {
+        pub fun borrowBlockanime(id: UInt64): &Blockanime.NFT? {
             // If the result isn't nil, the id of the returned reference
             // should be the same as the argument to the function
             post {
@@ -77,7 +95,7 @@ pub contract BlockAnime: NonFungibleToken {
     // Collection
     // A collection of Anime NFTs owned by an account
     //
-    pub resource Collection: BlockAnimeCollectionPublic, NonFungibleToken.Provider, NonFungibleToken.Receiver, NonFungibleToken.CollectionPublic {
+    pub resource Collection: BlockanimeCollectionPublic, NonFungibleToken.Provider, NonFungibleToken.Receiver, NonFungibleToken.CollectionPublic, MetadataViews.ResolverCollection {
         // dictionary of NFT conforming tokens
         // NFT is a resource type with an `UInt64` ID field
         //
@@ -94,14 +112,6 @@ pub contract BlockAnime: NonFungibleToken {
             return <-token
         }
 
-
-        // batchWithdraw withdraws multiple tokens and returns them as a Collection
-        //
-        // Parameters: ids: An array of IDs to withdraw
-        //
-        // Returns: @NonFungibleToken.Collection: A collection that contains
-        //                                        the withdrawn moments
-        //
         pub fun batchWithdraw(ids: [UInt64]): @NonFungibleToken.Collection {
             // Create a new empty Collection
             var batchCollection <- create Collection()
@@ -122,7 +132,7 @@ pub contract BlockAnime: NonFungibleToken {
         // and adds the ID to the id array
         //
         pub fun deposit(token: @NonFungibleToken.NFT) {
-            let token <- token as! @BlockAnime.NFT
+            let token <- token as! @Blockanime.NFT
 
             let id: UInt64 = token.id
 
@@ -134,8 +144,7 @@ pub contract BlockAnime: NonFungibleToken {
             destroy oldToken
         }
 
-
-         // batchDeposit takes a Collection object as an argument
+        // batchDeposit takes a Collection object as an argument
         // and deposits each contained NFT into this Collection
 
         pub fun batchDeposit(tokens: @NonFungibleToken.Collection) {
@@ -159,7 +168,7 @@ pub contract BlockAnime: NonFungibleToken {
             return self.ownedNFTs.keys
         }
 
-        
+    
 
         // borrowNFT
         // Gets a reference to an NFT in the collection
@@ -169,18 +178,24 @@ pub contract BlockAnime: NonFungibleToken {
             return &self.ownedNFTs[id] as &NonFungibleToken.NFT
         }
 
-        // borrowAnimeCard
+        // borrowSportsCard
         // Gets a reference to an NFT in the collection as a BlockAnime,
         // exposing all of its fields (including the typeID).
         // This is safe as there are no functions that can be called on the BlockAnime.
         //
-        pub fun borrowAnimeCard(id: UInt64): &BlockAnime.NFT? {
+        pub fun borrowBlockanime(id: UInt64): &Blockanime.NFT? {
             if self.ownedNFTs[id] != nil {
                 let ref = &self.ownedNFTs[id] as auth &NonFungibleToken.NFT
-                return ref as! &BlockAnime.NFT
+                return ref as! &Blockanime.NFT
             } else {
                 return nil
             }
+        }
+
+        pub fun borrowViewResolver(id: UInt64): &AnyResource{MetadataViews.Resolver} {
+            let nft = &self.ownedNFTs[id] as auth &NonFungibleToken.NFT
+            let blockanimeNFT = nft as! &Blockanime.NFT
+            return blockanimeNFT as &AnyResource{MetadataViews.Resolver}
         }
 
         // destructor
@@ -206,70 +221,65 @@ pub contract BlockAnime: NonFungibleToken {
     // Resource that an admin or something similar would own to be
     // able to mint new NFTs
     //
+    
 	pub resource NFTMinter {
 
        // mintNFT
         // Mints a new NFT with a new ID
 		// and deposit it in the recipients collection using their collection reference
         //
-		pub fun mintNFT(charName : String, genre : String, animeName : String): @NFT{
-            emit Minted(id: BlockAnime.totalSupply, charName : charName, genre : genre,animeName : animeName)
+		pub fun mintNFT(charName : String, animeName : String,thumbnail : String): @NFT{
+            emit Minted(id: Blockanime.totalSupply, charName : charName, animeName : animeName,thumbnail : thumbnail)
 
-            let newNFT : @NFT <-create BlockAnime.NFT(initID: BlockAnime.totalSupply, initName: charName, initGenre : genre,initAnime : animeName)
+            let newNFT : @NFT <-create Blockanime.NFT(initID: Blockanime.totalSupply, initCharName: charName, initAnimeName : animeName,initThumbnail : thumbnail)
 
 			// deposit it in the recipient's account using their reference
 			//recipient.deposit(token: <-create SportsCard.NFT(initID: SportsCard.totalSupply, initTypeID: typeID))
 
-            BlockAnime.totalSupply = BlockAnime.totalSupply + (1 as UInt64)
+            Blockanime.totalSupply = Blockanime.totalSupply + 1
 
             return <-newNFT
 		}
 
-        pub fun batchMint(charName : String,genre : String,animeName : String,quantity : UInt64): @Collection {
+        pub fun batchMint(charName : String,animeName : String,thumbnail :String, quantity : UInt64): @Collection {
             let newCollection <- create Collection()
 
             var i: UInt64 = 0
             while i < quantity {
-                newCollection.deposit(token: <-self.mintNFT(charName : charName,genre : genre,animeName : animeName))
-                i = i + (1 as UInt64)
+                newCollection.deposit(token: <-self.mintNFT(charName : charName,animeName : animeName,thumbnail : thumbnail))
+                i = i + 1
             }
 
             return <-newCollection
         }
 
+
 	}
-
-
-
+    
+    
 
     // initializer
     //
 	init() {
         // Set our named paths
-        self.CollectionStoragePath = /storage/BlockAnimeCollection
-        self.CollectionPublicPath = /public/BlockAnimeCollection
-        self.CollectionPrivatePath = /private/BloackAnimeCollection
+        self.CollectionStoragePath = /storage/BlockanimeCollection
+        self.CollectionPublicPath = /public/BlockanimeCollection
         
-        self.MinterStoragePath = /storage/BlockAnimeMinter
-        self.MinterPrivatePath = /private/BlockAnimeMinter
+        
+        self.MinterStoragePath = /storage/BlockanimeMinter
 
-        
+
+
         // Initialize the total supply
-        self.totalSupply = 0 as UInt64
-
-        let collection <- BlockAnime.createEmptyCollection()
+        self.totalSupply = 0 
 
         // save it to the account
-        self.account.save(<-collection, to: /storage/BlockAnimeCollection)
-
-        // create a public capability for the collection
-        self.account.link<&BlockAnime.Collection{NonFungibleToken.CollectionPublic, BlockAnime.BlockAnimeCollectionPublic}>(BlockAnime.CollectionPublicPath, target: BlockAnime.CollectionStoragePath)
-
+        self.account.save(<-create Collection(), to: self.CollectionStoragePath)
+        self.account.link<&Blockanime.Collection>(self.CollectionPublicPath,target : self.CollectionStoragePath)
 
         // Put the Minter in storage
         self.account.save<@NFTMinter>(<- create NFTMinter(), to: self.MinterStoragePath)
-        self.account.link<&NFTMinter>(self.MinterPrivatePath,target : self.MinterStoragePath)
-
+        
 
         emit ContractInitialized()
 	}

@@ -1,4 +1,4 @@
-import BlockAnime from 0x95c64d0a6df03a68
+import Blockanime from 0x95c64d0a6df03a68
 //return anime ids with same character name
 pub fun main(address: Address,charName : String): [UInt64]{
    
@@ -6,8 +6,8 @@ pub fun main(address: Address,charName : String): [UInt64]{
     
     let owner = getAccount(address)
 
-    let collectionBorrow = owner.getCapability(BlockAnime.CollectionPublicPath)
-        .borrow<&{BlockAnime.BlockAnimeCollectionPublic}>()
+    let collectionBorrow = owner.getCapability(Blockanime.CollectionPublicPath)
+        .borrow<&{Blockanime.BlockanimeCollectionPublic}>()
         ?? panic("Could not borrow BlockAnimeCollectionPublic")
 
     
@@ -15,7 +15,7 @@ pub fun main(address: Address,charName : String): [UInt64]{
 
     for id in nftIds {
          // borrow a reference to a specific NFT in the collection
-        let card = collectionBorrow.borrowAnimeCard(id: id)
+        let card = collectionBorrow.borrowBlockanime(id: id)
         ?? panic("No such itemID in that collection")
         if(card.charName==charName){
             idWithName.append(id)
