@@ -233,9 +233,6 @@ pub contract Blockanime: NonFungibleToken {
 
             let newNFT : @NFT <-create Blockanime.NFT(initID: Blockanime.totalSupply, initCharName: charName, initAnimeName : animeName,initThumbnail : thumbnail)
 
-			// deposit it in the recipient's account using their reference
-			//recipient.deposit(token: <-create SportsCard.NFT(initID: SportsCard.totalSupply, initTypeID: typeID))
-
             Blockanime.totalSupply = Blockanime.totalSupply + 1
 
             return <-newNFT
@@ -275,7 +272,7 @@ pub contract Blockanime: NonFungibleToken {
 
         // save it to the account
         self.account.save(<-create Collection(), to: self.CollectionStoragePath)
-        self.account.link<&Blockanime.Collection>(self.CollectionPublicPath,target : self.CollectionStoragePath)
+        self.account.link<&Blockanime.Collection{NonFungibleToken.CollectionPublic,Blockanime.BlockanimeCollectionPublic}>(self.CollectionPublicPath,target : self.CollectionStoragePath)
 
         // Put the Minter in storage
         self.account.save<@NFTMinter>(<- create NFTMinter(), to: self.MinterStoragePath)

@@ -1,4 +1,4 @@
-import Blockanime from 0x95c64d0a6df03a68
+import Blockanime from 0x0b87d8c6bd786e7a
 
 // This script returns true if a moment with the specified ID
 // exists in a user's collection
