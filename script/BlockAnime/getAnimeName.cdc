@@ -1,5 +1,5 @@
-import NonFungibleToken from 0x631e88ae7f1d7c20
-import Blockanime from 0x0b87d8c6bd786e7a
+import NonFungibleToken from 0x1d7e57aa55817448
+import Blockanime from 0x7ef193bff7bb7b44
 
 // This transaction returns an array of all the nft ids in the collection
 

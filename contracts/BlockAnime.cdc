@@ -1,8 +1,10 @@
-import NonFungibleToken from 0x631e88ae7f1d7c20
-import MetadataViews from 0x631e88ae7f1d7c20
+import NonFungibleToken from 0x1d7e57aa55817448
+import MetadataViews from 0x1d7e57aa55817448
 //BlockAnime
+
 // NFT items for Anime!
 //
+
 pub contract Blockanime: NonFungibleToken {
 
     // Events

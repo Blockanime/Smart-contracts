@@ -1,5 +1,5 @@
-import FungibleToken from 0x9a0766d93b6608b7
-import Mnga from 0x95c64d0a6df03a68
+import FungibleToken from 0xf233dcee88fe0abe
+import Mnga from 0x7ef193bff7bb7b44
 
 // This transaction is a template for a transaction
 // to add a Vault resource to their account
